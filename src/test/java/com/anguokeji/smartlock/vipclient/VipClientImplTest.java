@@ -1,9 +1,7 @@
 package com.anguokeji.smartlock.vipclient;
 
 import com.alibaba.fastjson.JSON;
-import com.anguokeji.smartlock.vipclient.forms.AddLockForm;
-import com.anguokeji.smartlock.vipclient.forms.SetLockKeyForm;
-import com.anguokeji.smartlock.vipclient.forms.SetLockNameForm;
+import com.anguokeji.smartlock.vipclient.forms.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +11,7 @@ import java.util.UUID;
 
 @RunWith(JUnit4.class)
 public class VipClientImplTest {
+    public static final String LOCK_ID = "23b9cc1c-6753-4eeb-aae5-dcc15a950499";
     VipClientImpl vipClient;
 
     @Before
@@ -28,27 +27,48 @@ public class VipClientImplTest {
     }
 
     @Test
-    public void testAddKey(){
-        AddLockForm addLockForm=new AddLockForm();
+    public void testAddKey() {
+        AddLockForm addLockForm = new AddLockForm();
         addLockForm.setLockId(UUID.randomUUID().toString());
         addLockForm.setMac("11:22:33:44:55:02");
         addLockForm.setName("test1");
         addLockForm.setSecret("AAAAAAAAAAAAAAAAAAAAAA==");
         vipClient.newLock(addLockForm);
     }
+
     @Test
-    public void test_reset_key(){
-        SetLockKeyForm addLockForm=new SetLockKeyForm();
+    public void test_reset_key() {
+        SetLockKeyForm addLockForm = new SetLockKeyForm();
         addLockForm.setLockId("23b9cc1c-6753-4eeb-aae5-dcc15a950499");
         addLockForm.setSecret("AFAAAAAAAAAAAAAAAAAAAA==");
         vipClient.resetKey(addLockForm);
     }
+
     @Test
-    public void test_reset_name(){
-        SetLockNameForm addLockForm=new SetLockNameForm();
-        addLockForm.setLockId("23b9cc1c-6753-4eeb-aae5-dcc15a950499");
+    public void test_reset_name() {
+        SetLockNameForm addLockForm = new SetLockNameForm();
+        addLockForm.setLockId(LOCK_ID);
         addLockForm.setName("hello1");
         vipClient.resetName(addLockForm);
     }
+
+    @Test
+    public void test_grant() {
+        GrantForm grantForm = new GrantForm();
+        grantForm.setLockId(LOCK_ID);
+        grantForm.setTarget("18657124116");
+        grantForm.setTargetName("bob");
+        grantForm.setLevel(10);
+        vipClient.grantLockTo(grantForm);
+    }
+
+    @Test
+    public void test_grant_remove() {
+        RemoveGrantForm grantForm = new RemoveGrantForm();
+        grantForm.setLockId(LOCK_ID);
+        grantForm.setTarget("18657124116");
+        vipClient.removeGrant(grantForm);
+    }
+
 
 }
