@@ -7,7 +7,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.List;
 import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class VipClientImplTest {
@@ -70,5 +73,30 @@ public class VipClientImplTest {
         vipClient.removeGrant(grantForm);
     }
 
+    @Test
+    public void test_add_finger() {
+        AddFingerPassForm addFingerPassForm = new AddFingerPassForm();
+        addFingerPassForm.setLockId(LOCK_ID);
+        addFingerPassForm.setData("hello");
+        addFingerPassForm.setName("test1");
+        addFingerPassForm.setUser("18657124116");
+        FingerPassVO fingerPassVO = vipClient.addFingerPass(addFingerPassForm);
+        System.out.println(fingerPassVO.getId());
+    }
+
+    @Test
+    public void test_delete_finger() {
+        DeleteFingerPassForm deleteFingerPassForm = new DeleteFingerPassForm();
+        deleteFingerPassForm.setLockId(LOCK_ID);
+        deleteFingerPassForm.setSeq(1);
+        vipClient.deleteFingerPass(deleteFingerPassForm);
+    }
+
+    @Test
+    public void listFinger() {
+        LockForm lockForm = new LockForm(LOCK_ID);
+        List<FingerPassVO> list = vipClient.listFingerPass(lockForm);
+        assertEquals(list.size(), 1);
+    }
 
 }
