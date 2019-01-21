@@ -28,4 +28,13 @@ public class FingerPassVO {
     public void setUserMobile(String userMobile) {
         this.userMobile = userMobile;
     }
+
+    @Override
+    public String toString() {
+        return "FingerPassVO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", userMobile='" + userMobile + '\'' +
+                '}';
+    }
 }

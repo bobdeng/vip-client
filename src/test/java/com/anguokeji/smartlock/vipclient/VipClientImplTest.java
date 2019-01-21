@@ -10,8 +10,6 @@ import org.junit.runners.JUnit4;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-
 @RunWith(JUnit4.class)
 public class VipClientImplTest {
     public static final String LOCK_ID = "23b9cc1c-6753-4eeb-aae5-dcc15a950499";
@@ -63,6 +61,9 @@ public class VipClientImplTest {
         grantForm.setTargetName("bob");
         grantForm.setLevel(10);
         vipClient.grantLockTo(grantForm);
+        List<GrantVO> grantVOS = vipClient.listGrant(new LockForm(LOCK_ID));
+        grantVOS.stream()
+                .forEach(grantVO -> System.out.println(grantVO));
     }
 
     @Test
@@ -88,7 +89,7 @@ public class VipClientImplTest {
     public void test_delete_finger() {
         DeleteFingerPassForm deleteFingerPassForm = new DeleteFingerPassForm();
         deleteFingerPassForm.setLockId(LOCK_ID);
-        deleteFingerPassForm.setSeq(1);
+        deleteFingerPassForm.setSeq(6870);
         vipClient.deleteFingerPass(deleteFingerPassForm);
     }
 
@@ -96,7 +97,7 @@ public class VipClientImplTest {
     public void listFinger() {
         LockForm lockForm = new LockForm(LOCK_ID);
         List<FingerPassVO> list = vipClient.listFingerPass(lockForm);
-        assertEquals(list.size(), 1);
+        list.forEach(fingerPassVO -> System.out.println(fingerPassVO));
     }
 
 }

@@ -1,7 +1,8 @@
 package com.anguokeji.smartlock.vipclient;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.anguokeji.smartlock.vipclient.forms.*;
 import okhttp3.*;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -14,6 +15,7 @@ import sun.security.rsa.RSAPrivateCrtKeyImpl;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -31,13 +33,34 @@ public class VipClientImpl implements VipClient {
 
 
     private <T> T callRequest(String url, String method, Object form, Class<T> clz) {
-        return callRequest(url, method, form, body -> JSON.parseObject(body, new TypeReference<BaseResult<T>>() {
-        }.getType()));
+        return callRequest(url, method, form, body -> {
+            JSONObject jsonObject = JSON.parseObject(body);
+            BaseResult<T> result = new BaseResult<>();
+            result.setCode(jsonObject.getInteger("code"));
+            result.setError(jsonObject.getString("error"));
+            JSONObject data = jsonObject.getJSONObject("data");
+            if (data != null) {
+                result.setData(data.toJavaObject(clz));
+            }
+            return result;
+        });
     }
 
     private <T> List<T> callRequestList(String url, String method, Object form, Class<T> clz) {
-        return callRequest(url, method, form, body -> JSON.parseObject(body, new TypeReference<BaseResult<List<T>>>() {
-        }.getType()));
+        return callRequest(url, method, form, body -> {
+            JSONObject jsonObject = JSON.parseObject(body);
+            BaseResult<List<T>> result = new BaseResult<>();
+            result.setCode(jsonObject.getInteger("code"));
+            result.setError(jsonObject.getString("error"));
+            JSONArray data = jsonObject.getJSONArray("data");
+            List<T> resultData = new ArrayList<>(data.size());
+            for (int i = 0; i < data.size(); i++) {
+                resultData.add(data.getJSONObject(i).toJavaObject(clz));
+            }
+            result.setData(resultData);
+            return result;
+
+        });
     }
 
     private <T> T callRequest(String url, String method, Object form, Function<String, BaseResult<T>> converter) {
