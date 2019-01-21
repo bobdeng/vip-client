@@ -89,7 +89,7 @@ public class VipClientImplTest {
     public void test_delete_finger() {
         DeleteFingerPassForm deleteFingerPassForm = new DeleteFingerPassForm();
         deleteFingerPassForm.setLockId(LOCK_ID);
-        deleteFingerPassForm.setSeq(6870);
+        deleteFingerPassForm.setSeq(6869);
         vipClient.deleteFingerPass(deleteFingerPassForm);
     }
 
