@@ -104,6 +104,11 @@ public class VipClientImpl implements VipClient {
         callRequest("/grant/grant_to", METHOD_PUT, grantForm, String.class);
     }
 
+    @Override
+    public List<GrantVO> listGrant(LockForm lockForm) {
+        return callRequestList("/grant/list", METHOD_POST, lockForm, GrantVO.class);
+    }
+
     public void removeGrant(RemoveGrantForm removeGrantForm) {
         callRequest("/grant/remove", METHOD_DELETE, removeGrantForm, String.class);
     }

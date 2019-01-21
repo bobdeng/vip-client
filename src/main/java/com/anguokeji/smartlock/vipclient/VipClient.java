@@ -16,6 +16,8 @@ public interface VipClient {
 
     void removeGrant(RemoveGrantForm removeGrantForm);
 
+    List<GrantVO> listGrant(LockForm lockForm);
+
     FingerPassVO addFingerPass(AddFingerPassForm addFingerPassForm);
 
     void deleteFingerPass(DeleteFingerPassForm deleteFingerPassForm);
