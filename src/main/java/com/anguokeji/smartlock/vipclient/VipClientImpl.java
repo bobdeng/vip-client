@@ -1,8 +1,7 @@
 package com.anguokeji.smartlock.vipclient;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.anguokeji.smartlock.vipclient.forms.*;
 import okhttp3.*;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -14,10 +13,9 @@ import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Type;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class VipClientImpl implements VipClient {
     private VipConfig vipConfig;
@@ -32,38 +30,7 @@ public class VipClientImpl implements VipClient {
     public static final String METHOD_DELETE = "DELETE";
 
 
-    private <T> T callRequest(String url, String method, Object form, Class<T> clz) {
-        return callRequest(url, method, form, body -> {
-            JSONObject jsonObject = JSON.parseObject(body);
-            BaseResult<T> result = new BaseResult<>();
-            result.setCode(jsonObject.getInteger("code"));
-            result.setError(jsonObject.getString("error"));
-            JSONObject data = jsonObject.getJSONObject("data");
-            if (data != null) {
-                result.setData(data.toJavaObject(clz));
-            }
-            return result;
-        });
-    }
-
-    private <T> List<T> callRequestList(String url, String method, Object form, Class<T> clz) {
-        return callRequest(url, method, form, body -> {
-            JSONObject jsonObject = JSON.parseObject(body);
-            BaseResult<List<T>> result = new BaseResult<>();
-            result.setCode(jsonObject.getInteger("code"));
-            result.setError(jsonObject.getString("error"));
-            JSONArray data = jsonObject.getJSONArray("data");
-            List<T> resultData = new ArrayList<>(data.size());
-            for (int i = 0; i < data.size(); i++) {
-                resultData.add(data.getJSONObject(i).toJavaObject(clz));
-            }
-            result.setData(resultData);
-            return result;
-
-        });
-    }
-
-    private <T> T callRequest(String url, String method, Object form, Function<String, BaseResult<T>> converter) {
+    private <T> T callRequest(String url, String method, Object form, Type type) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
         long timestamp = System.currentTimeMillis();
         String content = JSON.toJSONString(form);
@@ -78,7 +45,7 @@ public class VipClientImpl implements VipClient {
         try {
             Response response = okHttpClient.newCall(request).execute();
             if (response.isSuccessful()) {
-                BaseResult<T> result = converter.apply(response.body().string());
+                BaseResult<T> result = JSON.parseObject(response.body().string(), type);
                 if (result == null) {
                     throw new RuntimeException("server error");
                 }
@@ -112,39 +79,48 @@ public class VipClientImpl implements VipClient {
 
 
     public void newLock(AddLockForm addLockForm) {
-        callRequest("/lock/new_lock", METHOD_PUT, addLockForm, String.class);
+        callRequest("/lock/new_lock", METHOD_PUT, addLockForm, new TypeReference<BaseResult<String>>() {
+        }.getType());
     }
 
     public void resetKey(SetLockKeyForm setLockKeyForm) {
-        callRequest("/lock/reset_key", METHOD_PUT, setLockKeyForm, String.class);
+        callRequest("/lock/reset_key", METHOD_PUT, setLockKeyForm, new TypeReference<BaseResult<String>>() {
+        }.getType());
     }
 
     public void resetName(SetLockNameForm setLockNameForm) {
-        callRequest("/lock/set_name", METHOD_PUT, setLockNameForm, String.class);
+        callRequest("/lock/set_name", METHOD_PUT, setLockNameForm, new TypeReference<BaseResult<String>>() {
+        }.getType());
     }
 
     public void grantLockTo(GrantForm grantForm) {
-        callRequest("/grant/grant_to", METHOD_PUT, grantForm, String.class);
+        callRequest("/grant/grant_to", METHOD_PUT, grantForm, new TypeReference<BaseResult<String>>() {
+        }.getType());
     }
 
     @Override
     public List<GrantVO> listGrant(LockForm lockForm) {
-        return callRequestList("/grant/list", METHOD_POST, lockForm, GrantVO.class);
+        return callRequest("/grant/list", METHOD_POST, lockForm, new TypeReference<BaseResult<List<GrantVO>>>() {
+        }.getType());
     }
 
     public void removeGrant(RemoveGrantForm removeGrantForm) {
-        callRequest("/grant/remove", METHOD_DELETE, removeGrantForm, String.class);
+        callRequest("/grant/remove", METHOD_DELETE, removeGrantForm, new TypeReference<BaseResult<String>>() {
+        }.getType());
     }
 
     public FingerPassVO addFingerPass(AddFingerPassForm addFingerPassForm) {
-        return callRequest("/fingerpass/add", METHOD_POST, addFingerPassForm, FingerPassVO.class);
+        return callRequest("/fingerpass/add", METHOD_PUT, addFingerPassForm, new TypeReference<BaseResult<FingerPassVO>>() {
+        }.getType());
     }
 
     public void deleteFingerPass(DeleteFingerPassForm deleteFingerPassForm) {
-        callRequest("/fingerpass/delete", METHOD_DELETE, deleteFingerPassForm, String.class);
+        callRequest("/fingerpass/delete", METHOD_DELETE, deleteFingerPassForm, new TypeReference<BaseResult<String>>() {
+        }.getType());
     }
 
     public List<FingerPassVO> listFingerPass(LockForm lockForm) {
-        return callRequestList("/fingerpass/list", METHOD_POST, lockForm, FingerPassVO.class);
+        return callRequest("/fingerpass/list", METHOD_POST, lockForm, new TypeReference<BaseResult<List<FingerPassVO>>>() {
+        }.getType());
     }
 }
