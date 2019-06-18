@@ -19,9 +19,11 @@ import java.util.List;
 
 public class VipClientImpl implements VipClient {
     private VipConfig vipConfig;
+    private OkHttpClient okHttpClient;
 
     public VipClientImpl(VipConfig vipConfig) {
         this.vipConfig = vipConfig;
+        okHttpClient = new OkHttpClient.Builder().build();
     }
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
@@ -31,7 +33,7 @@ public class VipClientImpl implements VipClient {
 
 
     private <T> T callRequest(String url, String method, Object form, Type type) {
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+
         long timestamp = System.currentTimeMillis();
         String content = JSON.toJSONString(form);
         String sign = sign(vipConfig.getPriKeyInPem(), timestamp + content);
